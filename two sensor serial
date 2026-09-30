@@ -1,0 +1,81 @@
+/*
+Two Sensor Map
+
+Builds on twoSensorSerial.
+Each sensor sets the brightness of its own LED using map().
+
+Pin A1 : Sensor 1  ->  Pin 12 : LED 1
+Pin A2 : Sensor 2  ->  Pin 27 : LED 2
+
+Remember: analogRead() on the ESP32 gives a value from 0 - 4095
+analogWrite() takes a value from 0 - 255
+Set the Serial Monitor to 9600 baud to see the values.
+*/
+
+//Sensor variables
+int sensor1Pin = A1;
+int sensor1Value;       //the raw reading
+int sensor1Constrained; //the reading kept inside its range
+
+int sensor2Pin = A2;
+int sensor2Value;
+int sensor2Constrained;
+
+//The range each sensor actually gives you (0 - 4095)
+//Watch the Serial Monitor and change these to match your sensor
+int sensor1Min = 200;
+int sensor1Max = 300;
+
+int sensor2Min = 100;
+int sensor2Max = 500;
+
+//LED variables
+int led1Pin = 12;
+int led1Value;
+
+int led2Pin = 27;
+int led2Value;
+
+//The brightness range for each LED (0 - 255)
+int led1Min = 0;
+int led1Max = 255;
+
+int led2Min = 0;
+int led2Max = 255;
+
+void setup()
+{
+  Serial.begin(9600);
+
+  pinMode(led1Pin, OUTPUT);
+  pinMode(led2Pin, OUTPUT);
+}
+
+void loop()
+{
+  //read both sensors (0 - 4095)
+  sensor1Value = analogRead(sensor1Pin);
+  sensor2Value = analogRead(sensor2Pin);
+
+  //sensor values can jump outside the range, so keep them inside it first
+  sensor1Constrained = constrain(sensor1Value, sensor1Min, sensor1Max);
+  sensor2Constrained = constrain(sensor2Value, sensor2Min, sensor2Max);
+
+  //convert each sensor range into its LED range
+  led1Value = map(sensor1Constrained, sensor1Min, sensor1Max, led1Min, led1Max);
+  led2Value = map(sensor2Constrained, sensor2Min, sensor2Max, led2Min, led2Max);
+
+  //set the LEDs
+  analogWrite(led1Pin, led1Value);
+  analogWrite(led2Pin, led2Value);
+
+  //print the sensor and LED values on one line
+  Serial.print("Sensor 1: ");
+  Serial.print(sensor1Value);
+  Serial.print("   LED 1: ");
+  Serial.print(led1Value);
+  Serial.print("   Sensor 2: ");
+  Serial.print(sensor2Value);
+  Serial.print("   LED 2: ");
+  Serial.println(led2Value);
+}
